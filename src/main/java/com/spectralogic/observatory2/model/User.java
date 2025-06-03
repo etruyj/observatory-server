@@ -1,27 +1,23 @@
 //===================================================================
-// ServerConfig.java
+// User.java
 //      Description:
-//          This class models the server configuration
+//          This class models user info.
 //
 // Created by Sean Snyder
 //===================================================================
 
 package com.spectralogic.observatory2.server.model;
 
-public class ServerConfig {
-    private InfluxConfig influxdb;
-    private SqliteConfig sqlite;
+public class User {
+    private String site;
 
     //===========================================
     // Getters
     //===========================================
-    public InfluxConfig getInfluxdb() { return influxdb; }
-    public SqliteConfig getSqlite() { return sqlite; }
+    public String getSite() { return site; }
 
     //===========================================
     // Setters
     //===========================================
-    public void setInfluxdb(InfluxConfig influx) { this.influxdb = influx; }
-    public void setSqlite(SqliteConfig sqlite) { this.sqlite = sqlite; }
+    public void setSite(String site) { this.site = site; }
 }
-

@@ -95,7 +95,12 @@
         <artifactId>snakeyaml</artifactId>
         <version>2.2</version>
       </dependency>
-    <!-- Optionally: parameterized tests support -->
+    <dependency>
+        <groupId>org.xerial</groupId>
+        <artifactId>sqlite-jdbc</artifactId>
+        <version>3.45.2.0</version> <!-- Check GitHub or Maven Central for latest -->
+    </dependency>
+      <!-- Optionally: parameterized tests support -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>

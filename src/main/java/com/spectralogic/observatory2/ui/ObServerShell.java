@@ -11,8 +11,10 @@ package com.spectralogic.observatory2.server.ui;
 
 import com.socialvagrancy.utils.http.Server;
 import com.socialvagrancy.utils.http.ServerBuilder;
+import com.socialvagrancy.utils.io.Configuration;
 import com.socialvagrancy.utils.ui.ArgParser;
 import com.spectralogic.observatory2.server.command.ObServerController;
+import com.spectralogic.observatory2.server.model.ServerConfig;
 
 import java.util.ArrayList; //temporary for initial builds until config file is built
 import java.util.List;
@@ -20,10 +22,18 @@ import java.util.List;
 public class ObServerShell {
     public static void main(String[] args) {
         try {
+            Configuration.load("../observatory.yml", ServerConfig.class);
             ArgParser aparser = new ArgParser();
+            aparser = loadConfiguration(aparser);
             aparser.parse(args);
 
-            ObServerController conn = new ObServerController();
+            ObServerController conn = new ObServerController(
+                                                aparser.getRequired("influx-url"),
+                                                aparser.getRequired("influx-db"),
+                                                aparser.getRequired("influx-user"),
+                                                aparser.getRequired("influx-pass"),
+                                                aparser.getRequired("sqlite-path")
+                    );
 
             processCommand(aparser, conn);
         } catch(Exception e) {
@@ -42,6 +52,10 @@ public class ObServerShell {
                 //Display.print("../lib/options/version.txt");
             } else {
                 switch(aparser.getRequired("command")) {
+                    case "create-api-key":
+                        conn.createToken(aparser.getRequired("key"),
+                                        aparser.getRequired("site"));
+                        break;
                     case "start-server":
                         startServer(aparser.getRequired("ip-address"),
                                     aparser.getRequired("port"),
@@ -61,6 +75,22 @@ public class ObServerShell {
         } catch(Exception e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    public static ArgParser loadConfiguration(ArgParser aparser) {
+        ServerConfig config = Configuration.get();
+
+        String[] args = {
+            "--influx-url", config.getInfluxdb().getUrl(),
+            "--influx-db", config.getInfluxdb().getDatabaseName(),
+            "--influx-user", config.getInfluxdb().getUsername(),
+            "--influx-pass", config.getInfluxdb().getPassword(),
+            "--sqlite-path", config.getSqlite().getDatabase()
+        };
+
+        aparser.parse(args);
+
+        return aparser;
     }
 
     public static void startServer(String ip_address, String port, String api_prefix, ObServerController conn, List<String> allowed_origins) throws Exception {

@@ -30,7 +30,6 @@ public class BlackPearlApi {
     @Consumes("application/json")
     @Produces("application/json")
     public Response create(@HeaderParam("Authorization") String token, String body) {
-        return Response.status(200).entity("Test").build();
-        //return GiroupImp.createGroup(token, body, config);
+        return BlackPearlImp.storeMessages(token, body, config);
     }
 }
