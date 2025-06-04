@@ -61,7 +61,10 @@ public class ObServerShell {
                                     aparser.getRequired("port"),
                                     aparser.getRequired("api-prefix"),
                                     conn,
-                                    new ArrayList());
+                                    new ArrayList(),
+                                    aparser.getBoolean("force-http"),
+                                    aparser.getBoolean("force-http") ? "" : aparser.getRequired("cert-path"),
+                                    aparser.getBoolean("force-http") ? "" : aparser.getRequired("cert-password"));
                         break;
                     default:
                         System.err.println("Invalid command [" + aparser.getRequired("command") + "]. Use --help to list available options.");
@@ -85,7 +88,8 @@ public class ObServerShell {
             "--influx-db", config.getInfluxdb().getDatabaseName(),
             "--influx-user", config.getInfluxdb().getUsername(),
             "--influx-pass", config.getInfluxdb().getPassword(),
-            "--sqlite-path", config.getSqlite().getDatabase()
+            "--sqlite-path", config.getSqlite().getDatabase(),
+            "--cert-path", config.getCertPath()
         };
 
         aparser.parse(args);
@@ -93,15 +97,29 @@ public class ObServerShell {
         return aparser;
     }
 
-    public static void startServer(String ip_address, String port, String api_prefix, ObServerController conn, List<String> allowed_origins) throws Exception {
-        Server server = new ServerBuilder()
-                                .uri(ip_address, Integer.valueOf(port), api_prefix)
-                                .setPackage("com.spectralogic.observatory2.server.api")
-                                .addProperty("controller", conn)
-                                .addProperty("allowed_origins", allowed_origins)
-                                .addHttpFilter("cors")
-                                .setConnectionHttp()
-                                .build();
+    public static void startServer(String ip_address, String port, String api_prefix, ObServerController conn, List<String> allowed_origins, boolean forceHttp, String certPath, String certPassword) throws Exception {
+        Server server = null;
+
+        if(forceHttp) {
+            server = new ServerBuilder()
+                              .setConnectionHttp() // must be declared ahead of uri
+                              .uri(ip_address, Integer.valueOf(port), api_prefix)
+                              .setPackage("com.spectralogic.observatory2.server.api")
+                              .addProperty("controller", conn)
+                              .addProperty("allowed_origins", allowed_origins)
+                              .addHttpFilter("cors")
+                              .build();
+        } else {
+            System.err.println("HTTPS server");
+            server = new ServerBuilder()
+                              .uri(ip_address, Integer.valueOf(port), api_prefix)
+                              .setPackage("com.spectralogic.observatory2.server.api")
+                              .addProperty("controller", conn)
+                              .addProperty("allowed_origins", allowed_origins)
+                              .addHttpFilter("cors")
+                              .addCertificate(certPath, certPassword)                              
+                              .build();
+        }
     }
 
 }
