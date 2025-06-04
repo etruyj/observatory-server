@@ -27,14 +27,14 @@ public class WriteBlackPearlMessages {
             point = Point.measurement(table_name)
                         .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                         .tag("host", host)
-                        .addField("id", String.valueOf(message.getId()))
-                        .addField("severity", String.valueOf(message.getSeverity()))
+                        .addField("id", Float.valueOf(message.getId()))
+                        .addField("severity", message.getSeverity())
                         .addField("description_path", message.getDescriptionPath())
                         .addField("description_text", message.getDescriptionText())
                         .addField("details_path", message.getDetailsPath())
                         .addField("details_text", message.getDetailsText())
-                        .addField("read", message.isRead() ? "true" : "false")
-                        .addField("resolved", message.isResolved() ? "true" : "false")
+                        .addField("read", message.isRead())
+                        .addField("resolved", message.isResolved())
                         .build();
 
             influx.write(point);
